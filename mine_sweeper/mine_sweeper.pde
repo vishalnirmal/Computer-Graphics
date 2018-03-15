@@ -1,12 +1,22 @@
 cell c[];
-final int size = 40;
-final int nrows = 10;
-final int ncols = 10;
+final int size = 50;
+final int nrows = 8;
+final int ncols = 8;
+final int gap = 2;
 int level=1;
 int tilesOpened;
+PImage win;
+PImage flag,bomb;
+int counter = 0;
 void setup()
 {
-  size(401,401);
+  size(417,417);
+  win = loadImage("/home/vishalnirmal/Programs/Computer-graphics/mine_sweeper/youwin.png");
+  flag = loadImage("/home/vishalnirmal/sketchbook/mine_sweeper/flag.jpg");
+  bomb = loadImage("/home/vishalnirmal/sketchbook/mine_sweeper/bomb.png");
+  win.resize(501,501);
+  flag.resize(49,49);
+  bomb.resize(49,49);
   c = new cell[nrows*ncols];
   for(int i=0;i<nrows;i++)
   {
@@ -23,7 +33,8 @@ void setup()
       c[index(i,j)].countBombs();
     } 
   }
-  background(0);
+  background(255);
+  frameRate(100);
 }
 int index(int i,int j){
 return i + j*nrows;
@@ -54,7 +65,7 @@ void gameover()
 }
 int totalBombs(int level)
 {
-  return 2*level;
+  return 8+2*level;
 }
 void mousePressed()
 {
@@ -62,30 +73,31 @@ void mousePressed()
   int j = floor(mouseY/size);
   int index = index(i,j);
   if(mouseButton == RIGHT)
-    c[index].flaged = true;
+    c[index].flaged = !c[index].flaged;
   else if (mouseButton == LEFT && c[index].isOpened==false)
   {
     tilesOpened++;
     c[index].isOpened = true;
-    if(c[index].hasBomb)  gameover();
+    if(c[index].hasBomb)  {
+      c[index].clickedMine = true;
+      gameover();
+    }
     if(c[index].neighbours == 0) c[index].floodfill();
   }
-  //println(tilesOpened);
 }
 void draw()
 {
-  if(tilesOpened < (nrows*ncols-totalBombs(level)))
-  for(int i=0;i<nrows;i++)
+  if(mouseX>=0 && mouseX<width && mouseY>=0 && mouseY<height)
+  c[index(floor(mouseX/size),floor(mouseY/size))].onMouse = true;
+  if(tilesOpened >= (nrows*ncols-totalBombs(level)))
   {
-    for(int j=0;j<ncols;j++)
+    gameover();
+  }
+    for(int i=0;i<nrows;i++)
     {
-      c[index(i,j)].show();
-    } 
-  }
-  else
-  {
-    fill(0,100,0);
-    textSize(50);
-    text("You Win!!",301*0.30,301*0.65);
-  }
+      for(int j=0;j<ncols;j++)
+      {
+        c[index(i,j)].show();
+      } 
+    }
 }

@@ -7,24 +7,34 @@ class cell
   boolean isOpened = false;
   boolean hasBomb = false;
   boolean flaged = false;
+  boolean clickedMine = false;
+  boolean onMouse = false;
   cell(int i,int j,int size)
   {
     this.i = i;
     this.j = j;
     this.size = size;
-    x = i*size;
-    y = j*size;
+    x = i*(size+gap);
+    y = j*(size+gap);
   }
   void show()
   {
+    if(onMouse)
+    fill(240);
+    else
     fill(255);
     rect(x,y,size,size);
     if(isOpened)
     {
       if(hasBomb)
       {
-        fill(0);
-        ellipse(x+size*0.5,y+size*0.5,size*0.5,size*0.5);
+        fill(200);
+        if(this.flaged)
+        fill(0,255,0);
+        if(this.clickedMine)
+        fill(255,0,0);
+        rect(x,y,size,size);
+        image(bomb,x+1,y+1);
       }
       else
       {
@@ -39,9 +49,9 @@ class cell
     }
     else if(flaged)
     {
-      fill(0);
-      rect(x+size*0.25,y+size*.25,size*0.5,size*0.5);
+      image(flag,x+1,y+1);
     }
+    this.onMouse = false;
   }
   void countBombs()
   {
@@ -72,7 +82,24 @@ class cell
           tilesOpened++;
           c[index(x1,y1)].isOpened = true;
           c[index(x1,y1)].floodfill();
+          c[index(x1,y1)].openNeighbours();
         }
+      }
+    }
+  }
+  void openNeighbours()
+  {
+    for(int i = -1;i<2;i++)
+    {
+      for(int j=-1;j<2;j++)
+      {
+        if (this.i+i<0 || this.i+i>=nrows)  continue;
+        if(this.j+j<0 || this.j+j>=ncols)  continue;
+        if(!c[index(this.i+i,this.j+j)].hasBomb && !c[index(this.i+i,this.j+j)].isOpened && c[index(this.i+i,this.j+j)].neighbours != 0){
+          c[index(this.i+i,this.j+j)].isOpened = true;
+          tilesOpened++;
+        }
+        
       }
     }
   }
